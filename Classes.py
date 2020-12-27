@@ -1,24 +1,31 @@
 import pygame
-import random
-from enum import Enum
+
 from itertools import zip_longest
 
 
-class Direction(Enum):
-    """A enum for storing the four points of the compass"""
-    NORTH = 0
-    EAST = 1
-    SOUTH = 2
-    WEST = 3
+class Direction:
+    def __init__(self):
+        self.value = 0
+        self.direction = "NORTH"
 
-    @property
     def next(self):
-        """Returns the next point of the compass, for rotations"""
-        return Direction((self.value + 1) % 4)
+        if self.value == 0:
+            self.value = 1
+            self.direction = "EAST"
+        elif self.value == 1:
+            self.value = 2
+            self.direction = "SOUTH"
+        elif self.value == 2:
+            self.value = 3
+            self.direction = "WEST"
+        elif self.value == 3:
+            self.value = 0
+            self.direction = "NORTH"
 
 
 class Ship:
     """Ship class that contains coordinates"""
+
     def __init__(self, wsp_x, wsp_y, direction, length):
         self.wsp_poczatkowe = (wsp_x, wsp_y)
         self.direction = direction
@@ -27,17 +34,16 @@ class Ship:
     def ship_coordinates(self):
         x, y = self.wsp_poczatkowe
         if self.direction == "NORTH":
-            return [(x, y - i) for i in range(self.length)]
+            return [(x, y + i) for i in range(self.length)]
         elif self.direction == "EAST":
             return [(x + i, y) for i in range(self.length)]
         elif self.direction == "SOUTH":
-            return [(x, y + i) for i in range(self.length)]
+            return [(x, y - i) for i in range(self.length)]
         elif self.direction == "WEST":
             return [(x - i, y) for i in range(self.length)]
-        return [(x, y - i) for i in range(self.length)]
 
-    def rotate(self):
-        self.direction = Direction.next
+    def rotate(self, direction):
+        self.direction = direction
 
 
 class Boards:
@@ -50,7 +56,7 @@ class Boards:
 
     @staticmethod
     def ships_overlap(ship1, ship2):
-        """Checks whether two ships overlap"""
+        """Checks if two ships overlap"""
         for ship1_coord in ship1.ship_coordinates():
             for ship2_coord in ship2.ship_coordinates():
                 if ship1_coord == ship2_coord:
@@ -58,7 +64,6 @@ class Boards:
         return False
 
     def is_valid(self, ship):
-        print(ship.ship_coordinates())
         for x, y in ship.ship_coordinates():
             if x < 0 or y < 0 or x >= self.size or y >= self.size:
                 return False
@@ -67,7 +72,7 @@ class Boards:
                 return False
         return True
 
-    def add_ship(self, ship: Ship):
+    def add_ship(self, ship):
         """Adds a ship to the board"""
         if self.is_valid(ship):
             self.ships_list.append(ship)
@@ -80,8 +85,9 @@ class Boards:
         self.ships_list.remove(ship)
 
     def get_ship(self, x, y):
-        """Checks if coordinates is ships"""
+        """Checks if coordinates is ship"""
         for ship in self.ships_list:
+            print(ship.ship_coordinates())
             if (x, y) in ship.ship_coordinates():
                 return ship
         return None
@@ -90,7 +96,7 @@ class Boards:
         """Checks whether a set of coordinates is a valid shot"""
         if x not in range(self.size) or y not in range(self.size):
             return False
-        for previous_shot in self.misses_list + self.hits_list:
+        for previous_shot in self.misses_lists + self.hits_lists:
             if (x, y) == previous_shot:
                 return False
         return True
@@ -101,29 +107,28 @@ class Boards:
             return False
 
         for ship in self.ships_list:
-            for ship_coordinate in ship.coordinate_list:
+            for ship_coordinate in ship.ship_coordinates():
                 if (x, y) == ship_coordinate:
-                    self.hits_list.append((x, y))
+                    self.hits_lists.append((x, y))
                     return True
 
-        self.misses_list.append((x, y))
+        self.misses_lists.append((x, y))
         return True
 
     def colour_grid(self, colours, include_ships=True):
         """Calculates a colour representation of the board for display"""
-        grid = [[colours["water"] for _ in range(self.size)]
-                for _ in range(self.size)]
+        grid = [[colours["board"] for _ in range(self.size)] for _ in range(self.size)]
 
         if include_ships:
             for ship in self.ships_list:
-                for x, y in ship.coordinate_list:
-                    grid[y][x] = colours["ship"]
+                for y, x in ship.ship_coordinates():
+                    grid[x][y] = colours["ship"]
 
-        for x, y in self.hits_list:
-            grid[y][x] = colours["hit"]
+        for y, x in self.hits_lists:
+            grid[x][y] = colours["hit"]
 
-        for x, y in self.misses_list:
-            grid[y][x] = colours["miss"]
+        for y, x in self.misses_lists:
+            grid[x][y] = colours["miss"]
 
         return grid
 
@@ -131,20 +136,10 @@ class Boards:
     def gameover(self):
         """Checks to see if all the ships have been fully hit"""
         for ship in self.ships_list:
-            for coordinate in ship.coordinate_list:
-                if coordinate not in self.hits_list:
+            for coordinate in ship.ship_coordinates():
+                if coordinate not in self.hits_lists:
                     return False
         return True
-
-    def __str__(self):
-        """String representation of the board
-        similar to colour grid but for printing
-        """
-        output = (("~" * self.size) + "\n") * self.size
-        for ship in self.ships_list:
-            for x, y in ship.coordinate_list:
-                output[x + y * (self.size + 1)] = "S"
-        return output
 
 
 class PlayerBoard(Boards):
@@ -154,37 +149,39 @@ class PlayerBoard(Boards):
         """Initialises the board by placing ships."""
         super().__init__(board_size, ship_sizes)
         self.display = display
+        direction = Direction()
 
-        direction = "NORTH"
         while True:
+            self.display.show(self, self)
 
             if self.ship_to_place:
-                text = 'Click where you want your {}-long ship to be:'.format(
-                    self.ship_to_place)
+                text = f"Click where you want your {self.ship_to_place}-long ship to be:"
             else:
                 text = 'Click again to rotate a ship, or elsewhere if ready.'
-            self.display.show_text(text, lower=True)
+
+            self.display.show_text(text)
 
             x, y = self.display.get_input()
             if x is not None and y is not None:
                 ship = self.get_ship(x, y)
                 if ship:
                     self.remove_ship(ship)
-                    ship.rotate()
+                    direction.next()
+                    ship.rotate(direction.direction)
                     if self.is_valid(ship):
                         self.add_ship(ship)
                 elif self.ship_to_place:
-                    ship = Ship(x, y, direction, self.ship_to_place)
+                    ship = Ship(x, y, direction.direction, self.ship_to_place)
                     if self.is_valid(ship):
                         self.add_ship(ship)
                     else:
-                        direction = direction.next
+                        direction.next()
                 else:
                     break
-                print(self.ships_list[0].direction)
 
                 if self.is_valid(ship):
                     self.add_ship(ship)
+            Display.flip()
 
     @property
     def ship_to_place(self):
@@ -194,18 +191,17 @@ class PlayerBoard(Boards):
         for placed, to_place in zip_longest(placed_sizes, sizes):
             if placed != to_place:
                 return to_place
-        return None
+        return False
 
 
 class Display:
     """Class to handle PyGame input and output"""
     colours = {
-        "water": pygame.color.Color("blue"),
-        "ship": pygame.color.Color("gray"),
+        "board": pygame.color.Color("white"),
+        "ship": pygame.color.Color("blue"),
         "hit": pygame.color.Color("red"),
-        "miss": pygame.color.Color("lightcyan"),
-        "background": pygame.color.Color("navy"),
-        "text": pygame.color.Color("white")
+        "miss": pygame.color.Color("green"),
+        "background": pygame.color.Color("black")
     }
 
     def __init__(self, board_size=10, cell_size=30, margin=15):
@@ -217,63 +213,89 @@ class Display:
         pygame.font.init()
         self.font = pygame.font.SysFont("Helvetica", 14)
 
-        screen_width = self.cell_size * board_size + 2 * margin
-        screen_height = 2 * self.cell_size * board_size + 3 * margin
-        self.screen = pygame.display.set_mode(
-            [screen_width, screen_height])
+        screen_width = self.cell_size * (board_size + 1) + 2 * margin
+        screen_height = 2 * self.cell_size * (board_size + 1) + 3 * margin
+        self.screen = pygame.display.set_mode([screen_width, screen_height])
         pygame.display.set_caption("Project")
 
     def show(self, upper_board, lower_board, include_top_ships=False):
-        """Requests appropriate COlour Grids from boards, and draws them"""
+        """Functions that draw boards"""
         if upper_board is not None:
-            upper_colours = upper_board.colour_grid(
-                self.colours, include_top_ships)
-
+            upper_colours = upper_board.colour_grid(self.colours, include_top_ships)
         if lower_board is not None:
-            lower_colours = lower_board.colour_grid(
-                self.colours)
-
+            lower_colours = lower_board.colour_grid(self.colours)
+        alfabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
         self.screen.fill(Display.colours["background"])
-        for y in range(self.board_size):
-            for x in range(self.board_size):
+        for x in range(self.board_size):
+            for y in range(self.board_size):
 
                 if upper_board is not None:
-                    pygame.draw.rect(self.screen, upper_colours[y][x],
-                                     [self.margin + x * self.cell_size,
-                                      self.margin + y * self.cell_size,
-                                      self.cell_size, self.cell_size])
+                    """Add symbols"""
+                    if x == 0:
+                        white = (255, 255, 255)
+                        text = self.font.render(str(y + 1), True, white, (0, 0, 0))
+                        self.screen.blit(text, (self.margin + int(self.cell_size / 4),
+                                                self.cell_size + y * self.cell_size + int(self.cell_size / 8)))
+
+                    if y == 0:
+                        white = (255, 255, 255)
+                        text = self.font.render(alfabet[x], True, white, (0, 0, 0))
+                        self.screen.blit(text, (self.margin + (x + 1) * self.cell_size + int(self.cell_size / 4),
+                                                int(self.cell_size / 4)))
+                    """Draw board"""
+                    pygame.draw.rect(self.screen, upper_colours[x][y],
+                                     [self.cell_size + self.margin + (y * self.cell_size),
+                                      self.cell_size + x * self.cell_size,
+                                      self.cell_size - int(self.margin / 2), self.cell_size - int(self.margin / 2)])
 
                 if lower_board is not None:
-                    offset = self.margin * 2 + self.board_size * self.cell_size
-                    pygame.draw.rect(self.screen, lower_colours[y][x],
-                                     [self.margin + x * self.cell_size,
-                                      offset + y * self.cell_size,
-                                      self.cell_size, self.cell_size])
+                    offset = self.margin * 2 + (self.board_size + 1) * self.cell_size
+                    """Add symbols"""
+                    if x == 0:
+                        white = (255, 255, 255)
+                        text = self.font.render(str(y + 1), True, white, (0, 0, 0))
+                        self.screen.blit(text, (self.margin + int(self.cell_size / 4),
+                                                self.cell_size + offset + y * self.cell_size + int(self.cell_size / 8)))
 
-    def get_input(self):
+                    if y == 0:
+                        white = (255, 255, 255)
+                        text = self.font.render(alfabet[x], True, white, (0, 0, 0))
+                        self.screen.blit(text, (self.margin + (x + 1) * self.cell_size + int(self.cell_size / 4),
+                                                offset + int(self.cell_size / 4)))
+                    """Draw board"""
+                    pygame.draw.rect(self.screen, lower_colours[x][y],
+                                     [self.cell_size + self.margin + (y * self.cell_size),
+                                      self.cell_size + offset + x * self.cell_size,
+                                      self.cell_size - int(self.margin / 2), self.cell_size - int(self.margin / 2)])
+
+    def get_input(self, preparing=True):
         """Converts MouseEvents into board corrdinates, for input"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Display.close()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                y = y % (self.board_size * self.cell_size + self.margin)
-                x = (x - self.margin) // self.cell_size
-                y = (y - self.margin) // self.cell_size
-                if x in range(self.board_size) and y in range(self.board_size):
-                    return x, y
+                offset = self.margin * 2 + self.board_size * self.cell_size + self.cell_size
+                if preparing:
+                    if y > offset and x > self.margin + self.cell_size:
+                        y = int((y - (self.cell_size + offset)) / self.cell_size)
+                        x = int((x - (self.margin + self.cell_size)) / self.cell_size)
+                        return x, y
+                else:
+                    if offset > y > self.cell_size * 0.9 and x > self.margin + self.cell_size:
+                        y = int((y - self.cell_size) / self.cell_size)
+                        x = int((x - (self.margin + self.cell_size)) / self.cell_size)
+                        return x, y
         return None, None
 
-    def show_text(self, text, upper=False, lower=False):
-        """Displays text on the screen, either upper or lower """
-        x = self.margin
-        y_up = x
-        y_lo = self.board_size * self.cell_size + self.margin
-        label = self.font.render(text, True, Display.colours["text"])
-        if upper:
-            self.screen.blit(label, (x, y_up))
-        if lower:
-            self.screen.blit(label, (x, y_lo))
+    def show_text(self, text):
+        """Displays text on the screen"""
+        white = (255, 255, 255)
+        offset = self.margin * 2 + self.board_size * self.cell_size
+        text = self.font.render(text, True, white, (0, 0, 0))
+        self.screen.blit(text, (self.margin + int(self.cell_size / 4), offset))
+
+
 
     @classmethod
     def flip(cls):
@@ -289,33 +311,26 @@ class Display:
 class Game:
     """The overall class to control the game"""
 
-    def __init__(self, display, size=10, ship_sizes=[6, 4, 3, 3, 2]):
-        """Sets up the game by generating two Boards"""
+    def __init__(self, display, size=10, ship_sizes=[5, 4, 3, 2, 1]):
+        """Sets up the game by generating Board"""
         self.display = display
         self.board_size = size
         self.player_board = PlayerBoard(display, size, ship_sizes)
+        self.player_board2 = self.player_board
 
     def play(self):
         """The main game loop, alternating shots until someone wins"""
         print("Play starts")
         while not self.gameover:
-            if self.player_shot():
-                pass
-            self.display.show(self.player_board, self.player_board)
-            self.display.show_text("Click to guess:")
-            Display.flip()
-
-    def ai_shot(self):
-        """The AI's shot selection just randomly selects coordinates"""
-        x, y = -1, -1
-        while not self.player_board.valid_target(x, y):
-            x = random.randint(0, self.board_size - 1)
-            y = random.randint(0, self.board_size - 1)
-        self.player_board.shoot(x, y)
+            # if self.player_shot():
+            self.player_shot()
+            self.display.show(self.player_board2, self.player_board)
+            self.display.show_text("Try to hit enemy ships on board above!")
+            self.display.flip()
 
     def player_shot(self):
         """Uses input to decide if a shot is valid or not"""
-        x, y = self.display.get_input()
+        x, y = self.display.get_input(preparing=False)
         if self.player_board.valid_target(x, y):
             self.player_board.shoot(x, y)
             return True
