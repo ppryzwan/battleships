@@ -13,6 +13,10 @@ class Game:
         self.iD = iD
         self.board = [[], [], [], [[], [], []]]
         self.wins = [0, 0]
+        self.recieved_board = [0, 0]
+
+    def recieved_data(self, player):
+        self.recieved_board[player] = 1
 
     def get_player_board(self, p):
         return self.board[p]
@@ -32,6 +36,7 @@ class Game:
 
     def player(self, player, rest):
         self.board[player] = rest
+        self.recieved_board[player] = 1
         if player == 0:
             self.ready1 = True
         else:

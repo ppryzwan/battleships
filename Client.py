@@ -1,11 +1,8 @@
-import socket
-from Game import Game
-import _thread
-from Game import Game
 from Classes import *
 from Network import Network
 import pickle
 import time
+
 
 def player_shot(x, y, enemyboard):
     """Uses input to decide if a shot is valid or not"""
@@ -29,11 +26,13 @@ def main():
     d = PlayerBoard(window, 10, [1, 2])
     board = [player, [d.ships_list, d.hits_lists, d.misses_lists]]
     global hit
-    n.send(pickle.dumps(board))
-    while True:
+    game = n.send(pickle.dumps(board))
+    print(game.recieved_board[helper_board])
+    print(game.recieved_board)
+    while game.recieved_board[helper_board] == 0:
         game = n.requestBoard(pickle.dumps("board"))
-        if game.bothready():
-            break
+        print(game.recieved_board)
+
     while run:
         try:
             game = n.requestBoard(pickle.dumps("board"))
@@ -53,21 +52,21 @@ def main():
                         d.display.flip()
 
                 if d.gameover:
+                    print(d.gameover)
                     d.display.show_text("You lost this game, no more ships!")
                     d.display.flip()
+                    time.sleep(20)
                     game = n.requestBoard(pickle.dumps([player, "Lost"]))
                     print("Thanks for playing")
                     time.sleep(20)
                     d.display.close()
-                    break
                 elif Enemy.gameover:
                     d.display.show_text("You won this game, no more ships for opponent!")
                     d.display.flip()
+                    time.sleep(20)
                     game = n.requestBoard(pickle.dumps([player, "Won"]))
                     print("Thanks for playing")
-                    time.sleep(20)
                     d.display.close()
-                    break
 
                 d.ships_list = game.board[player][0]
                 d.hits_lists = game.board[player][1]
