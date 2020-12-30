@@ -1,85 +1,91 @@
-import socket
-from _thread import *
-from Game import Game
-import Classes
+""" Server of Game BattleShips"""
 import pickle
+import socket
+from _thread import start_new_thread
+from game_class import Game
 
-server = "127.0.0.1"
-port = 5555
+
+SERVER = "127.0.0.1"
+PORT = 5555
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
-    sock.bind((server, port))
-except socket.error as e:
-    str(e)
+    sock.bind((SERVER, PORT))
+except socket.error as sock_er:
+    str(sock_er)
 
 sock.listen(2)
 print("Waiting for connection, Server Started")
 connected = set()
 games = {}
-idCount = 0
+ID_COUNT = 0
 
 
-def threaded_client(conn, p, gameId):
-    global idCount
-    conn.send(str.encode(str(p), "utf-8"))
+def threaded_client(conn_server, player_n, game_id):
+    """
+    Function to handle requests
+    :param conn_server:
+    :param player_n:
+    :param game_id:
+    :return:
+    """
+    global ID_COUNT
+    conn_server.send(str.encode(str(player_n), "utf-8"))
 
     while True:
         try:
-            data = pickle.loads(conn.recv(2048 * 16))
-            if gameId in games:
-                game = games[gameId]
+            data = pickle.loads(conn_server.recv(2048 * 16))
+            if game_id in games:
+                game = games[game_id]
                 if data == "board":
-                    conn.send(pickle.dumps(game))
+                    conn_server.send(pickle.dumps(game))
                 elif data == "turn":
                     if game.bothready():
-                        conn.send(pickle.dumps(game))
+                        conn_server.send(pickle.dumps(game))
                     else:
-                        conn.send(pickle.dumps("Waiting"))
+                        conn_server.send(pickle.dumps("Waiting"))
                 elif data == "Set":
                     game.end_of_turn()
-                    conn.send(pickle.dumps("Ok"))
+                    conn_server.send(pickle.dumps("Ok"))
                 elif data[1] == "Won":
                     game.end_of_game(data[0], data[1])
-                    conn.send(pickle.dumps(f"Player {data[1]} won!"))
+                    conn_server.send(pickle.dumps(f"Player {data[1]} won!"))
                     print(f"Player {data[0]} won!")
-                    break
                 elif data[1] == "Lost":
                     game.end_of_game(data[0],data[1])
-                    conn.send(pickle.dumps(f"Player {data[1]} won!"))
+                    conn_server.send(pickle.dumps(f"Player {data[1]} lost!"))
                     print(f"Player {data[0]} won!")
-                    break
                 else:
                     game.player(data[0], data[1])
-                    conn.send(pickle.dumps(game))
+                    conn_server.send(pickle.dumps(game))
 
             else:
                 break
-        except:
+        except socket.error:
             break
 
     print("Lost connection")
     try:
-        del games[gameId]
-        print("Closing Game", gameId)
-    except:
+        del games[game_id]
+        print("Closing Game", game_id)
+    except socket.error:
         pass
-    idCount -= 1
-    conn.close()
+    ID_COUNT -= 1
+    conn_server.close()
 
 
 while True:
-    conn, addr = sock.accept()
+    conn_s, addr = sock.accept()
     print(f"Connected to {addr}")
-    idCount += 1
-    p = 0
-    gameId = (idCount - 1) // 2
-    if idCount % 2 == 1:
-        games[gameId] = Game(gameId)
+    ID_COUNT += 1
+    PLAYER_NUMBER = 0
+    GAME_ID = (ID_COUNT - 1) // 2
+    if ID_COUNT % 2 == 1:
+        games[GAME_ID] = Game(GAME_ID)
         print("Creating a new game...")
     else:
-        games[gameId].allset = True
-        p = 1
+        games[GAME_ID].allset = True
+        PLAYER_NUMBER = 1
 
-    start_new_thread(threaded_client, (conn, p, gameId))
+    start_new_thread(threaded_client, (conn_s, PLAYER_NUMBER, GAME_ID))
