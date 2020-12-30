@@ -169,6 +169,23 @@ class Boards:
         self.misses_lists.append((cord_x, cord_y))
         return True
 
+    def sink(self, cord_x, cord_y):
+        """
+        Checks if ship sunk
+        :param cord_x:
+        :param cord_y:
+        :return: True of false
+        """
+        sink = 0
+        for ship in self.ships_list:
+            if (cord_x, cord_y) in ship.ship_coordinates():
+                for coordinate in ship.ship_coordinates():
+                    if coordinate in self.hits_lists:
+                        sink += 1
+                    if sink == ship.length:
+                        return [1, ship.length]
+        return [0, ship.length]
+
     def colour_grid(self, colours, include_ships=True):
         """Calculates a colour representation of the board for display"""
         grid = [[colours["board"] for _ in range(self.size)] for _ in range(self.size)]
@@ -239,7 +256,8 @@ class PlayerBoard(Boards):
                     if self.is_valid(ship):
                         self.add_ship(ship)
                 elif self.ship_to_place:
-                    ship = Ship(cord_x, cord_y, direction.direction, self.ship_to_place)
+                    ship = Ship(cord_x, cord_y, direction.direction,
+                                self.ship_to_place)
                     if self.is_valid(ship):
                         self.add_ship(ship)
                     else:
@@ -267,10 +285,17 @@ class Display:
     """Class to handle PyGame input and output"""
     colours = {
         "board": (0, 0, 0),
-        "ship": (0, 0, 255),
-        "hit": (255, 0, 0),
-        "miss": (0, 128, 0),
-        "background": (128, 128, 128)
+        "ship": (255, 255, 255),
+        "hit": (139, 0, 0),
+        "miss": (30, 144, 255),
+        "background": (97, 97, 97)
+    }
+    colours_2 = {
+        "board": (0, 0, 0),
+        "ship": (255, 255, 255),
+        "hit": (50, 205, 50),
+        "miss": (30, 144, 255),
+        "background": (97, 97, 97)
     }
 
     def __init__(self, board_size=10, cell_size=30, margin=15):
@@ -291,7 +316,7 @@ class Display:
     def show(self, upper_board, lower_board, include_top_ships=False):
         """Functions that draw boards"""
         if upper_board is not None:
-            upper_colours = upper_board.colour_grid(self.colours, include_top_ships)
+            upper_colours = upper_board.colour_grid(self.colours_2, include_top_ships)
         if lower_board is not None:
             lower_colours = lower_board.colour_grid(self.colours)
         alfabet = [chr(i) for i in range(65, 91)]
@@ -300,46 +325,55 @@ class Display:
             for cord_y in range(self.board_size):
 
                 if upper_board is not None:
-                    #Add symbols
+                    # Add symbols
 
                     if cord_x == 0:
                         white = (255, 255, 255)
-                        text = self.font.render(str(cord_y + 1), True, white, (128, 128, 128))
+                        text = self.font.render(str(cord_y + 1), True, white,
+                                                (97, 97, 97))
                         self.screen.blit(text, (self.margin + int(self.cell_size / 4),
                                                 self.cell_size + cord_y * self.cell_size +
                                                 int(self.cell_size / 8)))
 
                     if cord_y == 0:
                         white = (255, 255, 255)
-                        text = self.font.render(alfabet[cord_x], True, white, (128, 128, 128))
-                        self.screen.blit(text, (self.margin + (cord_x + 1) * self.cell_size +
-                                                int(self.cell_size / 4), int(self.cell_size / 4)))
-                    #Draw board
+                        text = self.font.render(alfabet[cord_x], True, white,
+                                                (97, 97, 97))
+                        self.screen.blit(text,
+                                         (self.margin + (cord_x + 1) * self.cell_size +
+                                          int(self.cell_size / 4),
+                                          int(self.cell_size / 4)))
+                    # Draw board
                     pygame.draw.rect(self.screen, upper_colours[cord_x][cord_y],
-                                     [self.cell_size + self.margin + (cord_y * self.cell_size),
+                                     [self.cell_size + self.margin + (
+                                                 cord_y * self.cell_size),
                                       self.cell_size + cord_x * self.cell_size,
                                       self.cell_size - int(self.margin / 2),
                                       self.cell_size - int(self.margin / 2)])
 
                 if lower_board is not None:
                     offset = self.margin * 2 + (self.board_size + 1) * self.cell_size
-                    #Add symbols
+                    # Add symbols
                     if cord_x == 0:
                         white = (255, 255, 255)
-                        text = self.font.render(str(cord_y + 1), True, white, (128, 128, 128))
+                        text = self.font.render(str(cord_y + 1), True, white,
+                                                (97, 97, 97))
                         self.screen.blit(text, (self.margin + int(self.cell_size / 4),
                                                 self.cell_size + offset + cord_y * self.cell_size +
                                                 int(self.cell_size / 8)))
 
                     if cord_y == 0:
                         white = (255, 255, 255)
-                        text = self.font.render(alfabet[cord_x], True, white, (128, 128, 128))
-                        self.screen.blit(text, (self.margin + (cord_x + 1) * self.cell_size +
-                                                int(self.cell_size / 4),
-                                                offset + int(self.cell_size / 4)))
-                    #Draw board
+                        text = self.font.render(alfabet[cord_x], True, white,
+                                                (97, 97, 97))
+                        self.screen.blit(text,
+                                         (self.margin + (cord_x + 1) * self.cell_size +
+                                          int(self.cell_size / 4),
+                                          offset + int(self.cell_size / 4)))
+                    # Draw board
                     pygame.draw.rect(self.screen, lower_colours[cord_x][cord_y],
-                                     [self.cell_size + self.margin + (cord_y * self.cell_size),
+                                     [self.cell_size + self.margin + (
+                                                 cord_y * self.cell_size),
                                       self.cell_size + offset + cord_x * self.cell_size,
                                       self.cell_size - int(self.margin / 2),
                                       self.cell_size - int(self.margin / 2)])
@@ -355,7 +389,8 @@ class Display:
                 offset = self.margin * 2 + self.board_size * self.cell_size + self.cell_size
                 if preparing:
                     if cord_y > offset and cord_x > cell_margin:
-                        cord_y = int((cord_y - (self.cell_size + offset)) / self.cell_size)
+                        cord_y = int(
+                            (cord_y - (self.cell_size + offset)) / self.cell_size)
                         cord_x = int((cord_x - cell_margin) / self.cell_size)
                         return cord_x, cord_y
                 else:
@@ -371,7 +406,7 @@ class Display:
             self.font_text = pygame.font.SysFont("Helvetica", 18)
         white = (255, 255, 255)
         offset = self.margin * 2 + self.board_size * self.cell_size
-        text = self.font_text.render(text, True, white, (128, 128, 128))
+        text = self.font_text.render(text, True, white, (97, 97, 97))
         self.screen.blit(text, (self.margin + int(self.cell_size / 4), offset))
 
     @classmethod

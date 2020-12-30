@@ -48,7 +48,7 @@ def main():
     :return:
     """
     board_size = 10
-    len_ships = [1]
+    len_ships = [1, 2]
     run = True
     end_game = 0
     net_game = Network()
@@ -133,6 +133,11 @@ def main():
                             preparing=False)
                         if cord_x is not None and cord_y is not None:
                             valid = player_shot(cord_x, cord_y, enemy_board)
+                    sink_ship = enemy_board.sink(cord_x, cord_y)
+                    if sink_ship[0] == 1:
+                        ctypes.windll.user32.MessageBoxW(0,
+                                                         f"Ship {sink_ship[1]}-long for opponent has sunk!",
+                                                         "Ship has sunk!", 1)
                     player_board.display.show(enemy_board, player_board)
                     player_board.display.show_text(
                         "Waiting for other player to make a move!")
