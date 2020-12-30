@@ -60,7 +60,7 @@ def main():
     enemy_board = None
     window = Display()
     player_board = PlayerBoard(window, board_size, len_ships)
-    ctypes.windll.user32.MessageBoxW(0, "You're board is ready, wait for opponent!",
+    ctypes.windll.user32.MessageBoxW(0, "Your board is ready, wait for opponent!",
                                      "Board ready!", 1)
     board = [player, [player_board.ships_list, player_board.hits_lists,
                       player_board.misses_lists]]
