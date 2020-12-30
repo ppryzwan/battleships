@@ -1,7 +1,7 @@
 """Game Client"""
 import pickle
 import time
-
+import pygame
 from board_classes import PlayerBoard, EnemyBoard, Display
 from network_class import Network
 
@@ -114,4 +114,8 @@ def main():
             run = False
             print("Couldn't get game")
             break
+
+
+if __name__ == "__main__":
+    main()
 
