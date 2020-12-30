@@ -222,7 +222,8 @@ class PlayerBoard(Boards):
             self.display.show(None, self)
 
             if self.ship_to_place:
-                text = f"Click where you want your {self.ship_to_place}-long ship to be:"
+                text = f"Click where you want {self.ship_to_place}-long ship to be, " \
+                       f"you can change direction of ship!"
             else:
                 text = 'Click again to rotate a ship, or elsewhere if ready.'
 
@@ -279,7 +280,8 @@ class Display:
 
         pygame.init()
         pygame.font.init()
-        self.font = pygame.font.SysFont("Helvetica", 14)
+        self.font = pygame.font.SysFont("Helvetica", 12)
+        self.font_text = pygame.font.SysFont("Helvetica", 12)
 
         screen_width = self.cell_size * (board_size + 1) + 2 * margin
         screen_height = 2 * self.cell_size * (board_size + 1) + 3 * margin
@@ -363,11 +365,13 @@ class Display:
                         return cord_x, cord_y
         return None, None
 
-    def show_text(self, text):
+    def show_text(self, text, prep=False):
         """Displays text on the screen"""
+        if prep:
+            self.font_text = pygame.font.SysFont("Helvetica", 18)
         white = (255, 255, 255)
         offset = self.margin * 2 + self.board_size * self.cell_size
-        text = self.font.render(text, True, white, (128, 128, 128))
+        text = self.font_text.render(text, True, white, (128, 128, 128))
         self.screen.blit(text, (self.margin + int(self.cell_size / 4), offset))
 
     @classmethod

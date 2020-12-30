@@ -41,35 +41,39 @@ def threaded_client(conn_server, player_n, game_id):
                 if data == "board":
                     conn_server.send(pickle.dumps(game))
                 elif data == "turn":
-                    if game.bothready():
+                    if game.bothready() or sum(game.wins) != 0:
                         conn_server.send(pickle.dumps(game))
                     else:
                         conn_server.send(pickle.dumps("Waiting"))
                 elif data == "Set":
                     game.end_of_turn()
                     conn_server.send(pickle.dumps("Ok"))
+                elif data == "Game":
+                    conn_server.send(pickle.dumps(game))
                 elif data[1] == "Won":
                     game.end_of_game(data[0], data[1])
-                    conn_server.send(pickle.dumps(f"Player {data[1]} won!"))
+                    conn_server.send(pickle.dumps(f"Player {data[0]} won!"))
                     print(f"Player {data[0]} won!")
+                    break
                 elif data[1] == "Lost":
-                    game.end_of_game(data[0],data[1])
-                    conn_server.send(pickle.dumps(f"Player {data[1]} lost!"))
-                    print(f"Player {data[0]} won!")
+                    game.end_of_game(data[0], data[1])
+                    conn_server.send(pickle.dumps(f"Player {data[0]} lost!"))
+                    print(f"Player {data[0]} Lost!")
+                    break
                 else:
                     game.player(data[0], data[1])
                     conn_server.send(pickle.dumps(game))
 
             else:
                 break
-        except socket.error:
+        except:
             break
 
     print("Lost connection")
     try:
         del games[game_id]
         print("Closing Game", game_id)
-    except socket.error:
+    except:
         pass
     ID_COUNT -= 1
     conn_server.close()
