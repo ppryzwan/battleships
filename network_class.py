@@ -16,6 +16,13 @@ class Network:
         self.addr = (self.server, self.port)
         self.play = self.connect()
 
+    @staticmethod
+    def check_connection():
+        """Checks if server is offline"""
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = client.connect_ex(("127.0.0.1", 5555))
+        return result
+
     def get_p(self):
         """
         Method that returns connection

@@ -1,5 +1,6 @@
 """ Classes used to create user interface / boards """
 from itertools import zip_longest
+import random
 import pygame
 
 
@@ -8,9 +9,16 @@ class Direction:
     Directions of ships and rotating them
     """
 
-    def __init__(self):
-        self.value = 0
-        self.direction = "NORTH"
+    def __init__(self, value=0):
+        self.value = value
+        if self.value == 0:
+            self.direction = "NORTH"
+        elif self.value == 1:
+            self.direction = "EAST"
+        elif self.value == 2:
+            self.direction = "SOUTH"
+        elif self.value == 3:
+            self.direction = "WEST"
 
     def next(self):
         """
@@ -184,7 +192,7 @@ class Boards:
                         sink += 1
                     if sink == ship.length:
                         return [1, ship.length]
-        return [0, ship.length]
+            return [0, ship.length]
 
     def colour_grid(self, colours, include_ships=True):
         """Calculates a colour representation of the board for display"""
@@ -211,6 +219,24 @@ class Boards:
                 if coordinate not in self.hits_lists:
                     return False
         return True
+
+
+class AIBoard(Boards):
+    """A Board controlled by a AI"""
+
+    def __init__(self, board_size, ship_sizes):
+        """Initialises the board by randomly placing ships"""
+        super().__init__(board_size, ship_sizes)
+        for ship_length in self.ships_lengths:
+            ship_added = False
+            while not ship_added:
+                cord_x = random.randint(0, board_size - 1)
+                cord_y = random.randint(0, board_size - 1)
+                ship_direction = Direction(random.randint(0, 3))
+                ship = Ship(cord_x, cord_y, ship_direction.direction, ship_length)
+                if self.is_valid(ship):
+                    self.add_ship(ship)
+                    ship_added = True
 
 
 class EnemyBoard(Boards):
@@ -346,7 +372,7 @@ class Display:
                     # Draw board
                     pygame.draw.rect(self.screen, upper_colours[cord_x][cord_y],
                                      [self.cell_size + self.margin + (
-                                                 cord_y * self.cell_size),
+                                             cord_y * self.cell_size),
                                       self.cell_size + cord_x * self.cell_size,
                                       self.cell_size - int(self.margin / 2),
                                       self.cell_size - int(self.margin / 2)])
@@ -373,7 +399,7 @@ class Display:
                     # Draw board
                     pygame.draw.rect(self.screen, lower_colours[cord_x][cord_y],
                                      [self.cell_size + self.margin + (
-                                                 cord_y * self.cell_size),
+                                             cord_y * self.cell_size),
                                       self.cell_size + offset + cord_x * self.cell_size,
                                       self.cell_size - int(self.margin / 2),
                                       self.cell_size - int(self.margin / 2)])
