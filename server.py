@@ -54,17 +54,13 @@ def threaded_client(conn_server, player_n, game_id):
                     game.end_of_game(data[0], data[1])
                     conn_server.send(pickle.dumps(f"Player {data[0]} won!"))
                     print(f"Player {data[0]} won!")
-                    break
-                elif data[1] == "Lost":
-                    game.end_of_game(data[0], data[1])
-                    conn_server.send(pickle.dumps(f"Player {data[0]} lost!"))
-                    print(f"Player {data[0]} Lost!")
-                    break
                 else:
                     game.player(data[0], data[1])
                     conn_server.send(pickle.dumps(game))
 
             else:
+                break
+            if sum(game.wins) > 0:
                 break
         except:
             break

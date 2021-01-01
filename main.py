@@ -72,6 +72,11 @@ def single_player():
     board_size = 10
     len_ships = [1, 2]
 
+    list_cord = []
+    for i in range(board_size):
+        for j in range(board_size):
+            list_cord.append((i, j))
+
     window = Display()
     player_board = PlayerBoard(window, board_size, len_ships)
     ai_board = AIBoard(board_size, len_ships)
@@ -90,12 +95,10 @@ def single_player():
             valid_target = ai_board.valid_target(cord_x, cord_y)
         ai_board.shoot(cord_x, cord_y)
 
-        cordai_x, cordai_y = -1, -1
-        valid_target = ai_board.valid_target(cordai_x, cordai_y)
-        while not valid_target:
-            cordai_x = random.randint(0, board_size - 1)
-            cordai_y = random.randint(0, board_size - 1)
-            valid_target = ai_board.valid_target(cordai_x, cordai_y)
+        cord_ai = random.randint(0, len(list_cord) - 1)
+
+        cordai_x, cordai_y = list_cord.pop(cord_ai)
+
         player_board.shoot(cordai_x, cordai_y)
         player_board.display.show(ai_board, player_board)
         player_board.display.show_text(
@@ -122,14 +125,10 @@ def multi_player():
     :return:
     """
     board_size = 10
-    len_ships = [1, 2]
+    len_ships = [1]
     run = True
     end_game = 0
-    if Network.check_connection() != 0:
-        ctypes.windll.user32.MessageBoxW(0, "Server is not available!",
-                                         "Server is offline!", 1)
-        game_menu()
-    else:
+    try:
         net_game = Network()
         player = int(net_game.get_p())
         helper_board = 0
@@ -146,7 +145,8 @@ def multi_player():
 
         game = net_game.send(pickle.dumps(board))
         while not game.connected():
-            player_board.display.show_text("Waiting for opponent to connect. . . ", True)
+            player_board.display.show_text("Waiting for opponent to connect. . . ",
+                                           True)
             player_board.display.flip()
             time.sleep(5)
             game = net_game.send(pickle.dumps("Game"))
@@ -185,9 +185,12 @@ def multi_player():
                             "You lost this game, no more ships!", True)
                         player_board.display.flip()
                         time.sleep(5)
-                        game = net_game.request_board(pickle.dumps([player, "Lost"]))
-                        print("Thanks for playing", game)
+                        print("Thanks for playing")
                         player_board.display.close()
+                        ctypes.windll.user32.MessageBoxW(0,
+                                                         "Game Over - Redirecting to main menu!",
+                                                         "Game Over!", 1)
+                        game_menu()
                     elif enemy_board.gameover:
                         player_board.display.show(enemy_board, player_board)
                         player_board.display.show_text(
@@ -195,9 +198,12 @@ def multi_player():
                         player_board.display.flip()
                         time.sleep(5)
                         game = net_game.request_board(pickle.dumps([player, "Won"]))
-                        print("Thanks for playing", game)
+                        print("Thanks for playing")
                         player_board.display.close()
-
+                        ctypes.windll.user32.MessageBoxW(0,
+                                                         "Game Over - Redirecting to main menu!",
+                                                         "Game Over!", 1)
+                        game_menu()
                     player_board.display.show(enemy_board, player_board)
                     player_board.display.show_text(
                         "Try to hit enemy ships on board above!", True)
@@ -205,7 +211,8 @@ def multi_player():
                     cord_x, cord_y = None, None
 
                     if cord_x is None and cord_y is None and not is_hit:
-                        cord_x, cord_y = player_board.display.get_input(preparing=False)
+                        cord_x, cord_y = player_board.display.get_input(
+                            preparing=False)
                         valid = player_shot(cord_x, cord_y, enemy_board)
                         while not valid:
                             cord_x, cord_y = player_board.display.get_input(
@@ -241,6 +248,10 @@ def multi_player():
             except:
                 print("Couldn't get game")
                 break
+    except:
+        ctypes.windll.user32.MessageBoxW(0, "Server is not available!",
+                                         "Server is offline!", 1)
+        game_menu()
 
 
 def game_menu():
@@ -289,4 +300,3 @@ def game_menu():
 
 if __name__ == "__main__":
     game_menu()
-

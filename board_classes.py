@@ -191,8 +191,8 @@ class Boards:
                     if coordinate in self.hits_lists:
                         sink += 1
                     if sink == ship.length:
-                        return [1, ship.length]
-            return [0, ship.length]
+                        return [1, sink]
+        return [0, sink]
 
     def colour_grid(self, colours, include_ships=True):
         """Calculates a colour representation of the board for display"""
@@ -335,7 +335,8 @@ class Display:
         self.font_text = pygame.font.SysFont("Helvetica", 12)
 
         screen_width = self.cell_size * (board_size + 1) + 2 * margin
-        screen_height = 2 * self.cell_size * (board_size + 1) + 3 * margin
+        screen_height = 2 * self.cell_size * (
+                board_size + 2) + 3 * margin + self.board_size * 4
         self.screen = pygame.display.set_mode([screen_width, screen_height])
         pygame.display.set_caption("Project")
 
@@ -403,6 +404,70 @@ class Display:
                                       self.cell_size + offset + cord_x * self.cell_size,
                                       self.cell_size - int(self.margin / 2),
                                       self.cell_size - int(self.margin / 2)])
+                    # Colors Legend
+                    font = pygame.font.SysFont("Helvetica", 14)
+                    text = font.render("Colors:", True, (255, 255, 255),
+                                       (97, 97, 97))
+                    self.screen.blit(text,
+                                     (self.cell_size + self.margin,
+                                      offset + (1 + self.board_size) * self.cell_size +
+                                      int(self.cell_size / 8)))
+
+                    pygame.draw.rect(self.screen, self.colours_2["hit"],
+                                     [self.cell_size + self.margin,
+                                      (2 * self.cell_size) + offset +
+                                      self.board_size * self.cell_size,
+                                      self.cell_size - int(self.margin / 2),
+                                      self.cell_size - int(self.margin / 2)])
+
+                    text = font.render("Enemy Ship hit", True, (255, 255, 255),
+                                            (97, 97, 97))
+                    self.screen.blit(text,
+                                     (self.cell_size * 2 + self.margin,
+                                      offset + (2 + self.board_size) * self.cell_size +
+                                      int(self.cell_size / 8)))
+
+                    pygame.draw.rect(self.screen, self.colours["hit"],
+                                     [self.cell_size + self.margin,
+                                      (
+                                              3 * self.cell_size) + offset + self.board_size * self.cell_size,
+                                      self.cell_size - int(self.margin / 2),
+                                      self.cell_size - int(self.margin / 2)])
+
+                    text = font.render("Ally ship hit", True, (255, 255, 255),
+                                            (97, 97, 97))
+                    self.screen.blit(text,
+                                     (self.cell_size * 2 + self.margin,
+                                      offset + (3 + self.board_size) * self.cell_size +
+                                      int(self.cell_size / 8)))
+
+                    pygame.draw.rect(self.screen, self.colours_2["miss"],
+                                     [self.screen.get_width() / 2,
+                                      (
+                                              2 * self.cell_size) + offset + self.board_size * self.cell_size,
+                                      self.cell_size - int(self.margin / 2),
+                                      self.cell_size - int(self.margin / 2)])
+
+                    text = font.render("Shot misses", True, (255, 255, 255),
+                                            (97, 97, 97))
+                    self.screen.blit(text,
+                                     (self.screen.get_width() / 2 + self.cell_size,
+                                      offset + (2 + self.board_size) * self.cell_size +
+                                      int(self.cell_size / 8)))
+
+                    pygame.draw.rect(self.screen, self.colours_2["ship"],
+                                     [self.screen.get_width() / 2,
+                                      (3 * self.cell_size) + offset +
+                                      self.board_size * self.cell_size,
+                                      self.cell_size - int(self.margin / 2),
+                                      self.cell_size - int(self.margin / 2)])
+
+                    text = font.render("Your Ships", True, (255, 255, 255),
+                                            (97, 97, 97))
+                    self.screen.blit(text,
+                                     (self.screen.get_width() / 2 + self.cell_size,
+                                      offset + (3 + self.board_size) * self.cell_size +
+                                      int(self.cell_size / 8)))
 
     def get_input(self, preparing=True):
         """Converts MouseEvents into board corrdinates, for input"""
