@@ -290,12 +290,15 @@ def game_menu():
     main_menu.add_button('Quit', pygame_menu.events.EXIT)
 
     while True:
-        # Tick
-        clock.tick(menu_fps)
-        background_image.draw(surface)
-        main_menu.mainloop(surface, lambda: background_image.draw(surface),
-                           fps_limit=menu_fps)
-        pygame.display.flip()
+        try:
+            # Tick
+            clock.tick(menu_fps)
+            background_image.draw(surface)
+            main_menu.mainloop(surface, lambda: background_image.draw(surface),
+                               fps_limit=menu_fps)
+            pygame.display.flip()
+        except:
+            break
 
 
 if __name__ == "__main__":
