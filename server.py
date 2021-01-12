@@ -1,12 +1,13 @@
 """ Server of Game BattleShips"""
 import pickle
 import socket
+
 from _thread import start_new_thread
 from game_class import Game
+import settings
 
-
-SERVER = "127.0.0.1"
-PORT = 5555
+SERVER = settings.SERVER
+PORT = settings.PORT
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

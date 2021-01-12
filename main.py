@@ -1,11 +1,13 @@
 """Game Client"""
+import ctypes
 import os
 import pickle
-import time
-import ctypes
 import random
-import pygame_menu
+import time
 import pygame
+import pygame_menu
+import settings
+
 from board_classes import PlayerBoard, EnemyBoard, Display, AIBoard
 from network_class import Network
 
@@ -69,8 +71,8 @@ def single_player():
     Single player main function
     :return:
     """
-    board_size = 10
-    len_ships = [1, 2]
+    board_size = settings.BOARD_SIZE
+    len_ships = settings.LEN_SHIPS
 
     list_cord = []
     for i in range(board_size):
@@ -124,8 +126,8 @@ def multi_player():
     Main function of game - client side
     :return:
     """
-    board_size = 10
-    len_ships = [1]
+    board_size = settings.BOARD_SIZE
+    len_ships = settings.LEN_SHIPS
     run = True
     end_game = 0
     try:
@@ -154,8 +156,8 @@ def multi_player():
         while game.recieved_board[helper_board] == 0:
             game = net_game.request_board(pickle.dumps("board"))
             run = True
-        ctypes.windll.user32.MessageBoxW(0, "Opponend is found, prepare for game!",
-                                         "Opponend Found!", 1)
+        ctypes.windll.user32.MessageBoxW(0, "Opponent is found, prepare for game!",
+                                         "Opponent Found!", 1)
 
         gametime = True
         while run:
