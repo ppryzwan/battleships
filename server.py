@@ -72,7 +72,7 @@ def threaded_client(conn_server, player_n, game_id):
         print("Closing Game", game_id)
     except:
         pass
-    ID_COUNT -= 1
+    ID_COUNT -= 2
     conn_server.close()
 
 

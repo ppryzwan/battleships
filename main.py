@@ -132,6 +132,8 @@ def multi_player():
     end_game = 0
     try:
         net_game = Network()
+        if not net_game.get_p():
+            raise TypeError
         player = int(net_game.get_p())
         helper_board = 0
         if player == 0:
@@ -170,8 +172,6 @@ def multi_player():
 
                 if gametime:
                     net_game.request_board(pickle.dumps("Set"))
-                    global is_hit
-                    is_hit = False
 
                     if enemy_board is None:
                         enemy_board = EnemyBoard(board_size, len_ships,
@@ -212,7 +212,7 @@ def multi_player():
                     player_board.display.flip()
                     cord_x, cord_y = None, None
 
-                    if cord_x is None and cord_y is None and not is_hit:
+                    if cord_x is None and cord_y is None:
                         cord_x, cord_y = player_board.display.get_input(
                             preparing=False)
                         valid = player_shot(cord_x, cord_y, enemy_board)
@@ -231,7 +231,6 @@ def multi_player():
                         player_board.display.show_text(
                             "Waiting for other player to make a move!")
                         player_board.display.flip()
-                        is_hit = True
 
                     update_board(player_board, game, player)
                     board = [helper_board,
