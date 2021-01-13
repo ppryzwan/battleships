@@ -250,9 +250,13 @@ def multi_player():
             except:
                 print("Couldn't get game")
                 break
-    except:
+    except TypeError:
         ctypes.windll.user32.MessageBoxW(0, "Server is not available!",
                                          "Server is offline!", 1)
+        game_menu()
+    except:
+        ctypes.windll.user32.MessageBoxW(0, "Game is not available!",
+                                         "Game is not available!", 1)
         game_menu()
 
 

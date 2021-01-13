@@ -421,7 +421,7 @@ class Display:
                                       self.cell_size - int(self.margin / 2)])
 
                     text = font.render("Enemy Ship hit", True, (255, 255, 255),
-                                            (97, 97, 97))
+                                       (97, 97, 97))
                     self.screen.blit(text,
                                      (self.cell_size * 2 + self.margin,
                                       offset + (2 + self.board_size) * self.cell_size +
@@ -435,7 +435,7 @@ class Display:
                                       self.cell_size - int(self.margin / 2)])
 
                     text = font.render("Ally ship hit", True, (255, 255, 255),
-                                            (97, 97, 97))
+                                       (97, 97, 97))
                     self.screen.blit(text,
                                      (self.cell_size * 2 + self.margin,
                                       offset + (3 + self.board_size) * self.cell_size +
@@ -449,7 +449,7 @@ class Display:
                                       self.cell_size - int(self.margin / 2)])
 
                     text = font.render("Shot misses", True, (255, 255, 255),
-                                            (97, 97, 97))
+                                       (97, 97, 97))
                     self.screen.blit(text,
                                      (self.screen.get_width() / 2 + self.cell_size,
                                       offset + (2 + self.board_size) * self.cell_size +
@@ -463,7 +463,7 @@ class Display:
                                       self.cell_size - int(self.margin / 2)])
 
                     text = font.render("Your Ships", True, (255, 255, 255),
-                                            (97, 97, 97))
+                                       (97, 97, 97))
                     self.screen.blit(text,
                                      (self.screen.get_width() / 2 + self.cell_size,
                                       offset + (3 + self.board_size) * self.cell_size +

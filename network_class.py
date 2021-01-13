@@ -5,27 +5,18 @@ import socket
 import pickle
 import settings
 
+
 class Network:
     """
     Network class for games
     """
+
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = settings.SERVER
         self.port = settings.PORT
         self.addr = (self.server, self.port)
         self.play = self.connect()
-
-    @staticmethod
-    def check_connection(server, port):
-        """Checks if server is offline"""
-        try:
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            addr = (server, port)
-            client.connect(addr)
-            return 1
-        except socket.error:
-            return 0
 
     def get_p(self):
         """

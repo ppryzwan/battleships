@@ -16,7 +16,7 @@ try:
 except socket.error as sock_er:
     str(sock_er)
 
-sock.listen(2)
+sock.listen(4)
 print("Waiting for connection, Server Started")
 connected = set()
 games = {}
@@ -72,7 +72,7 @@ def threaded_client(conn_server, player_n, game_id):
         print("Closing Game", game_id)
     except:
         pass
-    ID_COUNT -= 2
+    ID_COUNT -= 1
     conn_server.close()
 
 
