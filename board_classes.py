@@ -429,8 +429,8 @@ class Display:
 
                     pygame.draw.rect(self.screen, self.colours["hit"],
                                      [self.cell_size + self.margin,
-                                      (
-                                              3 * self.cell_size) + offset + self.board_size * self.cell_size,
+                                      (3 * self.cell_size) +
+                                      offset + self.board_size * self.cell_size,
                                       self.cell_size - int(self.margin / 2),
                                       self.cell_size - int(self.margin / 2)])
 
@@ -443,8 +443,8 @@ class Display:
 
                     pygame.draw.rect(self.screen, self.colours_2["miss"],
                                      [self.screen.get_width() / 2,
-                                      (
-                                              2 * self.cell_size) + offset + self.board_size * self.cell_size,
+                                      (2 * self.cell_size) +
+                                      offset + self.board_size * self.cell_size,
                                       self.cell_size - int(self.margin / 2),
                                       self.cell_size - int(self.margin / 2)])
 
