@@ -28,7 +28,7 @@ do that server needs to be online.
 ## Setup
 Needs to install libraries: pygame and pygame-menu, setup configuration of server (if multiplayer).
 To be able to play on LAN - run server.py
-In settings.py you can change amount of ships (adding to list size of ship), board size.
+In settings.py you can change amount of ships (adding to the list, size of added ship for example "5"), board size.
  
 
 ## Code Examples
