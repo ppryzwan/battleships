@@ -84,7 +84,7 @@ def single_player():
     ai_board = AIBoard(board_size, len_ships)
     ctypes.windll.user32.MessageBoxW(0, "Your board is ready, prepare for game!",
                                      "Board ready!", 1)
-    player_board.display.show(ai_board, player_board, include_top_ships=True)
+    player_board.display.show(ai_board, player_board, include_top_ships=settings.TESTING)
     player_board.display.show_text(
         "Try to hit enemy ships on board above!", True)
     player_board.display.flip()
