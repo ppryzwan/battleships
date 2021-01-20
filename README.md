@@ -23,6 +23,7 @@ do that server needs to be online.
 ## Technologies
 * pygame version 2.0.1
 * pygame-menu version 3.3.2
+* python version 3.9
 
 
 ## Setup
